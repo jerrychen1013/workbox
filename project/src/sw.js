@@ -57,3 +57,45 @@ workboxSW.router.registerRoute(/\/images\/icon\/*/,
     }
   })
 );
+
+var articleHandler = workboxSW.strategies.networkFirst({
+  cacheName: 'articles-cache',
+  cacheExpiration: {
+    maxEntries: 50
+  }
+})
+
+workboxSW.router.registerRoute('/pages/article*.html', args => {
+  return articleHandler.handle(args)
+                        .then(response => {
+                          if (!response) {
+                            return caches.match('pages/offline.html');
+                          } else if (response.status === 404) {
+                            return caches.match('pages/404.html');
+                          }
+                          return response;
+                        });
+})
+
+var postHandler = workboxSW.strategies.cacheFirst({
+  cacheName: 'posts-cache',
+  cacheExpiration: {
+    maxEntries: 50
+  }
+})
+
+workboxSW.router.registerRoute('/pages/post*.html', args => {
+  // 忘記加return , 卡很久！！！！！！！！！！！！！！！！！
+  return postHandler.handle(args)
+              .then(response => {
+                console.log('in post then condition')
+                if (response.status === 404) {
+                  console.log('in 404 condition', response.status)
+                  return caches.match('pages/404.html')
+                }
+                return response
+              })
+              .catch(function () {
+                return caches.match('pages/offline.html')
+              })
+})

@@ -1,1 +1,1 @@
-/Users/chenlirui/Dropbox/.eslintrc.js
+/Users/jerrychen/Dropbox/.eslintrc.js
